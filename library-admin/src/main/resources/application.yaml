@@ -1,6 +1,40 @@
 spring:
   application:
-    name: library-admin
+    name: library
+  profiles:
+    active: dev
+
+  # 上传文件大小配置
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+
 server:
-  port: 8081
+  servlet:
+    context-path: '/api/library'
+
+# mybatis-plus相关配置
+mybatis-plus:
+  global-config:
+    # 关闭自带的横幅广告的设置
+    banner: false
+    db-config:
+      # 主键生成策略为自动增长
+      id-type: auto
+      # 数据库表名的下划线命名规则开启
+      table-underline: true
+  # 指定Mapper XML文件的路径，项目生成的xml文件全部放在resource目录下的mapper文件中。
+#  mapper-locations: classpath:mapper/*.xml
+  mapper-locations: classpath:/mapper/**/*.xml
+  configuration:
+    use-generated-keys: true
+    # 日志输出为控制台，数据库查询、删除等执行日志都会输出在控制台
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    call-setters-on-nulls: true
 

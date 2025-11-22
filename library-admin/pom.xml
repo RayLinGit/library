@@ -16,32 +16,78 @@
 	<name>library-admin</name>
 	<description>主系统</description>
 
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
-
 	<properties>
 		<java.version>17</java.version>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.library</groupId>
+			<artifactId>library-common</artifactId>
+		</dependency>
 	</dependencies>
 
+	<!-- 环境 -->
+	<profiles>
+		<!--  profile元素包含了特定环境的配置。每个profile都有一个唯一的标识符id标签，用于标识不同环境 -->
+		<profile>
+			<id>dev</id>
+			<properties>
+				<!-- 标识当前环境-->
+				<package.environment>dev</package.environment>
+			</properties>
+			<activation>
+				<!--默认激活配置-->
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+		<!-- 测试环境 -->
+		<profile>
+			<id>test</id>
+			<properties>
+				<package.environment>test</package.environment>
+			</properties>
+		</profile>
+		<!-- 生产环境 -->
+		<profile>
+			<id>prod</id>
+			<properties>
+				<package.environment>prod</package.environment>
+			</properties>
+		</profile>
+	</profiles>
+
 	<build>
+		<finalName>library-admin-pro</finalName>
 		<plugins>
+			<!-- Spring Boot Maven 插件配置 -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<!-- 构建生成的最终文件名，例如，本项目文件名是library-admin-pro -->
+					<finalName>${project.build.finalName}-${project.version}</finalName>
+				</configuration>
+				<executions>
+					<execution>
+						<id>repackage</id>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+						<!-- 配置输出目录 -->
+						<configuration>
+							<outputDirectory>ci</outputDirectory>
+							<executable>true</executable>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

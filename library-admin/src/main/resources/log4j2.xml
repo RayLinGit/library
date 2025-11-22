@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="10">
+    <Properties>
+        <!-- 日志字符集为UTF-8 -->
+        <property name="log_charset">UTF-8</property>
+        <!-- 日志文件的基本名称 -->
+        <Property name="filename">library</Property>
+        <!-- 日志文件存储路径 -->
+        <Property name="log_path">logs</Property>
+        <!-- 日志文件的编码格式为UTF-8 -->
+        <Property name="library_log_encoding">UTF-8</Property>
+        <!-- 单个日志文件的最大大小为200MB -->
+        <Property name="library_log_size">200MB</Property>
+        <!-- 日志记录的最低级别为INFO -->
+        <property name="data_level">INFO</property>
+        <!-- 日志文件的最长保留时间为5天，超过这个时间的日志文件将被自动删除 -->
+        <Property name="library_log_time">5d</Property>
+        <!-- 日志输出的格式模式 -->
+        <!-- %-d{yyyy-MM-dd HH:mm:ss}，表示以“年-月-日 时:分:秒”的格式输出日期时间；%-5r表示输出相对时间，即启动后经过的毫秒数；[%t]表示输出线程名；[%-5p]表示输出日志级别，左对齐显示5个字符宽度；%c表示输出日志记录器的名称；%x表示输出线程上下文信息；%m%n表示输出日志消息和换行符。-->
+        <property name="log_pattern" value="%-d{yyyy-MM-dd HH:mm:ss} %-5r [%t] [%-5p] %c %x - %m%n" />
+
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <!--输出日志的格式-->
+            <PatternLayout pattern="${log_pattern}"/>
+            <!--控制台只输出level及其以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY" />
+        </Console>
+        <!--系统日志-->
+        <RollingRandomAccessFile name="LIBRARY_FILE"
+                                 fileName="${log_path}/${filename}.log"
+                                 filePattern="${log_path}/${filename}_%d{yyyy-MM-dd}_%i.log.gz">
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}][%-5p][%t][%c{1}] %m%n"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="${library_log_size}"/>
+            </Policies>
+        </RollingRandomAccessFile>
+        <!--操作日志-->
+        <RollingRandomAccessFile name="OPERA_ERR"
+                                 fileName="${log_path}/${filename}_opera_err.log"
+                                 filePattern="${log_path}/${filename}_opera_err_%d{yyyy-MM-dd}_%i.log.gz">
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}][%-5p][%t][%c{1}] %m%n"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="${library_log_size}"/>
+            </Policies>
+        </RollingRandomAccessFile>
+
+        <!-- 这个会打印出所有的error及以下级别的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档-->
+        <RollingFile name="RollingFileError" fileName="${log_path}/error.log" filePattern="${log_path}/${filename}-ERROR-%d{yyyy-MM-dd}_%i.log.gz">
+            <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${log_pattern}"/>
+            <Policies>
+                <!--interval属性用来指定多久滚动一次，默认是1 hour-->
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <!-- DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件开始覆盖-->
+            <DefaultRolloverStrategy max="15"/>
+        </RollingFile>
+
+    </Appenders>
+
+    <Loggers>
+        <!--监控系统信息, 若是additivity设为false，则 子Logger 只会在自己的appender里输出，而不会在 父Logger 的appender里输出。-->
+        <AsyncLogger name="org.springframework" level="info" additivity="false">
+            <AppenderRef ref="Console"/>
+        </AsyncLogger>
+        <!--过滤掉spring和mybatis的一些无用的DEBUG信息-->
+        <AsyncLogger name="org.mybatis" level="info" additivity="false">
+            <AppenderRef ref="Console"/>
+        </AsyncLogger>
+        <AsyncLogger additivity="false" name="com.library.admin" level="INFO">
+            <AppenderRef ref="Console" level="INFO"/>
+            <AppenderRef ref="LIBRARY_FILE"/>
+            <AppenderRef ref="RollingFileError"/>
+        </AsyncLogger>
+
+        <!--系统相关日志-->
+        <AsyncRoot level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="LIBRARY_FILE"/>
+            <AppenderRef ref="RollingFileError"/>
+        </AsyncRoot>
+
+        <!-- 操作日志 -->
+        <AsyncLogger name="operaErr" level="INFO" additivity="false">
+            <AppenderRef ref="OPERA_ERR"/>
+        </AsyncLogger>
+    </Loggers>
+</Configuration>

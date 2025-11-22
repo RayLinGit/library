@@ -1,0 +1,60 @@
+spring:
+  datasource:
+    # 当前数据源操作类型
+    type: com.alibaba.druid.pool.DruidDataSource
+    # 数据库驱动类的名称，这里是MySQL的驱动类
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    druid:
+      # 数据库的连接URL，包括本地的IP地址和数据库名称
+      url: jdbc:mysql://127.0.0.1:3306/library_v1?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
+      # 数据库登录用户名
+      username: root
+      # 数据库登录密码，如果后期没有修改则是安装MySQL时设置的密码
+      password: mysql
+      # 初始连接数
+      initial-size: 5
+      # 最小连接数
+      min-idle: 15
+      # 最大连接数
+      max-active: 30
+      # 超时时间(以秒数为单位)
+      remove-abandoned-timeout: 180
+      # 获取连接超时时间（单位：毫秒）
+      max-wait: 300000
+      # 连接有效性检测时间
+      time-between-eviction-runs-millis: 60000
+      # 保持空闲连接不被关闭的最小生存时间（单位：毫秒）
+      min-evictable-idle-time-millis: 300000
+      # 连接在池中最大生存的时间
+      max-evictable-idle-time-millis: 900000
+      # 整合 MySQL 監控
+      stat-view-servlet:
+        # 地址，例如：http://localhost:8081/api/library/druid/index.html
+        # 开启Druid的监控页面
+        enabled: true
+        # 监控页面的用户名
+        loginUsername: admin
+        # 监控页面的密码
+        loginPassword: 123456
+        allow:
+        web-stat-filter:
+          # 是否启用StatFilter默认值true
+          enabled: true
+          # 开启session统计功能
+          session-stat-enable: true
+          # session的最大个数,默认100
+          session-stat-max-count: 1000
+          # 过滤路径
+          url-pattern: /*
+        # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，wall用于防火墙
+        filters: stat,wall,slf4j
+        filter:
+          # 开启druid datasource的状态监控
+          stat:
+            enabled: true
+            db-type: mysql
+            # 开启慢sql监控，超过2s 就认为是慢sql，记录到日志中
+            log-slow-sql: true
+            slow-sql-millis: 2000
+server:
+  port: 8081
